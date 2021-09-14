@@ -5,18 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
-func getToken() string {
-	envErr := godotenv.Load()
-	if envErr != nil {
-		log.Fatal("Error loding env")
-	}
+type Twitch_cred struct {
+	gorm.Model
+	ID uint 	`gorm:"primaryKey"`
+	Token string `json:"access_token"`
+	Expires_In string `json:"expires_in"`
+}
+
+
+func getToken() Twitch_cred {
 
 	tClient := os.Getenv("TWITCH_CLIENT")
 	tSecret := os.Getenv("TWITCH_SECRET")
@@ -39,6 +42,14 @@ func getToken() string {
 		fmt.Printf("The HTTP request failed misareably %s \n", err)
 	} 
 	data, _ := ioutil.ReadAll(response.Body)
-	return string(data)
+	// println(string(data))
+	
+	var tokenStruct Twitch_cred
+
+	json.Unmarshal(data, &tokenStruct)
+
+	println(tokenStruct.Token)
+
+	return tokenStruct
 
 }
